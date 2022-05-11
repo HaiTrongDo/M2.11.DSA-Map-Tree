@@ -31,7 +31,7 @@ var BST = /** @class */ (function () {
                 else {
                     searchTree(node.left);
                 }
-                //if value > node.value, go right
+                // if value > node.value, go right
             }
             else if (value > node.value) {
                 if (!node.right) {
@@ -51,16 +51,6 @@ var BST = /** @class */ (function () {
             currentNode = currentNode.left;
         }
         return currentNode.value;
-    };
-    BST.prototype.findLasLeftAndDelete = function (node) {
-        var currentNode = node;
-        //go all the way to the last left child node
-        while (currentNode.left) {
-            currentNode = currentNode.left;
-        }
-        var result = currentNode.value;
-        currentNode.value = null;
-        return result;
     };
     BST.prototype.max = function () {
         var currentNode = this.root;
@@ -121,11 +111,11 @@ var BST = /** @class */ (function () {
     BST.prototype.dfsPostOrder = function () {
         var result = [];
         var traverse = function (node) {
-            result.push(node.value);
             if (node.left)
                 traverse(node.left);
             if (node.right)
                 traverse(node.right);
+            result.push(node.value);
         };
         traverse(this.root);
         return result;
@@ -133,54 +123,60 @@ var BST = /** @class */ (function () {
     BST.prototype.bfs = function () {
         var result = [];
         var queue = [];
+        var count = 1;
         queue.push(this.root);
         while (queue.length) {
             var currentNode = queue.shift();
-            result.push(currentNode);
+            result.push(currentNode.value);
             if (currentNode.left) {
                 queue.push(currentNode.left);
             }
             if (currentNode.right) {
                 queue.push(currentNode.right);
             }
+            count++;
         }
         return result;
     };
-    BST.prototype.deleteNode = function (value) {
-        var _this = this;
-        this.count--;
-        var currentNode;
-        var previousNode;
-        var searchTreeByValue = function (currentNode) {
-            if (currentNode.value != value) {
-                if (value < currentNode.value) {
-                    previousNode = currentNode;
-                    currentNode = currentNode.left;
-                    searchTreeByValue(currentNode);
-                }
-                if (value > currentNode.value) {
-                    previousNode = currentNode;
-                    currentNode = currentNode.right;
-                    searchTreeByValue(currentNode);
-                }
+    BST.prototype.removeNode = function (value) {
+        this.root = this.deleteNode(this.root, value);
+    };
+    BST.prototype.deleteNode = function (node, value) {
+        if (node === null) {
+            return null;
+        }
+        else if (value < node.value) {
+            node.left = this.deleteNode(node.left, value);
+            return node;
+        }
+        else if (value > node.value) {
+            node.right = this.deleteNode(node.right, value);
+            return node;
+        }
+        else {
+            if (node.left === null && node.right === null) {
+                node = null;
+                return node;
             }
-            else if (currentNode.value == value) {
-                if (currentNode.left === null && currentNode.right === null) {
-                    previousNode.left = null;
-                    return;
-                }
-                if (currentNode.right) {
-                    currentNode.value = _this.findLasLeftAndDelete(currentNode.right);
-                    return;
-                }
-                if (currentNode.left) {
-                    currentNode.value = _this.findLasLeftAndDelete(currentNode);
-                    return;
-                }
+            if (node.left === null) {
+                node = node.right;
+                return node;
             }
-        };
-        searchTreeByValue(this.root);
-        // console.log(currentNode);
+            if (node.right === null) {
+                node = node.left;
+                return node;
+            }
+        }
+        var temp = this.findLasLeft(node.right);
+        node.value = temp.value;
+        node.right = this.deleteNode(node.right, temp.value);
+        return node;
+    };
+    BST.prototype.findLasLeft = function (node) {
+        var currentNode = node;
+        while (currentNode.left) {
+            currentNode = currentNode.left;
+        }
         return currentNode;
     };
     return BST;
@@ -190,13 +186,11 @@ var bts = new BST(15);
 bts.insert(3);
 bts.insert(2);
 bts.insert(12);
-bts.insert(9);
-bts.insert(13);
 bts.insert(36);
 bts.insert(28);
 bts.insert(39);
-bts.deleteNode(39);
-console.log(bts.root.right);
+// bts.deleteNode(3);
+// console.log(bts.root);
 // console.log(bts.min())
 // console.log(bts.max())
 // console.log(bts.contains(2))
@@ -204,3 +198,4 @@ console.log(bts.root.right);
 // console.log(bts.dfsInOrder())
 // console.log(bts.dfsPostOrder())
 // console.log(bts.dfsPreOrder())
+console.log(bts.bfs());
